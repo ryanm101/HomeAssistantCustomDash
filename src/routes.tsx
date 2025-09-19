@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type LazyExoticComponent } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import AppShell from "./app/AppShell";
 
@@ -9,32 +9,26 @@ const MediaPage = lazy(() => import("./pages/MediaPage"));
 const SecurityPage = lazy(() => import("./pages/SecurityPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 
+function LoadingFallback() {
+  return (
+    <div className="flex h-full items-center justify-center text-sm text-slate-300/80">
+      Loading…
+    </div>
+  );
+}
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<AppShell />}> 
-          <Route
-            index
-            element={
-              <Suspense fallback={<div className="p-3">Loading…</div>}>
-                <Navigate to="/overview" replace />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/overview"
-            element={
-              <Suspense fallback={<div className="p-3">Loading…</div>}>
-                <OverviewPage />
-              </Suspense>
-            }
-          />
-          <Route path="/climate" element={<Suspense fallback={<div className=\"p-3\">Loading…</div>}><ClimatePage /></Suspense>} />
-          <Route path="/energy" element={<Suspense fallback={<div className=\"p-3\">Loading…</div>}><EnergyPage /></Suspense>} />
-          <Route path="/media" element={<Suspense fallback={<div className=\"p-3\">Loading…</div>}><MediaPage /></Suspense>} />
-          <Route path="/security" element={<Suspense fallback={<div className=\"p-3\">Loading…</div>}><SecurityPage /></Suspense>} />
-          <Route path="/settings" element={<Suspense fallback={<div className=\"p-3\">Loading…</div>}><SettingsPage /></Suspense>} />
+        <Route element={<AppShell />}>
+          <Route index element={<Navigate to="/overview" replace />} />
+          <Route path="/overview" element={<LazyPage component={OverviewPage} />} />
+          <Route path="/climate" element={<LazyPage component={ClimatePage} />} />
+          <Route path="/energy" element={<LazyPage component={EnergyPage} />} />
+          <Route path="/media" element={<LazyPage component={MediaPage} />} />
+          <Route path="/security" element={<LazyPage component={SecurityPage} />} />
+          <Route path="/settings" element={<LazyPage component={SettingsPage} />} />
           <Route path="*" element={<Navigate to="/overview" replace />} />
         </Route>
       </Routes>
@@ -42,3 +36,10 @@ export default function AppRouter() {
   );
 }
 
+function LazyPage({ component: Component }: { component: LazyExoticComponent<() => JSX.Element> }) {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <Component />
+    </Suspense>
+  );
+}

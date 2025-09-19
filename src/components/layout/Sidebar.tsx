@@ -1,29 +1,35 @@
 import { NavLink } from "react-router-dom";
 
 const links = [
-  { to: "/overview", label: "Overview" },
-  { to: "/climate", label: "Climate" },
-  { to: "/energy", label: "Energy" },
-  { to: "/media", label: "Media" },
-  { to: "/security", label: "Security" },
-  { to: "/settings", label: "Settings" },
+  { to: "/overview", label: "Overview", abbr: "OV" },
+  { to: "/climate", label: "Climate", abbr: "CL" },
+  { to: "/energy", label: "Energy", abbr: "EN" },
+  { to: "/media", label: "Media", abbr: "MD" },
+  { to: "/security", label: "Security", abbr: "SC" },
+  { to: "/settings", label: "Settings", abbr: "ST" },
 ];
 
 export default function Sidebar() {
   return (
-    <nav className="flex h-full w-24 flex-col gap-2 border-r p-2" aria-label="Sidebar">
-      {links.map((l) => (
+    <nav className="flex h-full w-[92px] flex-col gap-3 p-3" aria-label="Sidebar">
+      {links.map((link) => (
         <NavLink
-          key={l.to}
-          to={l.to}
+          key={link.to}
+          to={link.to}
           className={({ isActive }) =>
-            `block rounded-md px-2 py-3 text-center text-sm ${isActive ? "bg-gray-200 dark:bg-gray-800 font-medium" : "hover:bg-gray-100 dark:hover:bg-gray-900"}`
+            `group flex-1 rounded-2xl border border-slate-800/70 px-3 py-4 text-center text-xs font-medium uppercase tracking-wide transition ${
+              isActive
+                ? "bg-slate-800/70 text-cyan-200 shadow-[0_10px_30px_rgba(15,118,212,0.25)]"
+                : "bg-slate-900/30 text-slate-300/80 hover:bg-slate-800/40"
+            }`
           }
         >
-          {l.label}
+          <span className="mb-1 block text-base tracking-widest" aria-hidden>
+            {link.abbr}
+          </span>
+          <span className="block">{link.label}</span>
         </NavLink>
       ))}
     </nav>
   );
 }
-
