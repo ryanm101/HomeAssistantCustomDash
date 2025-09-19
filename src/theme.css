@@ -1,0 +1,16 @@
+:root{
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
+}
+
+html, body, #root { height: 100%; }
+
+/* Density presets */
+[data-density="compact"] { --space: 0.25rem; }
+[data-density="comfortable"] { --space: 0.375rem; }
+
+/* Kiosk affordances */
+body { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+
