@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import AppShell from "./app/AppShell";
 
 const OverviewPage = lazy(() => import("./pages/OverviewPage"));
+const SolarPage = lazy(() => import("./pages/SolarPage"));
 const ClimatePage = lazy(() => import("./pages/ClimatePage"));
 const EnergyPage = lazy(() => import("./pages/EnergyPage"));
 const MediaPage = lazy(() => import("./pages/MediaPage"));
@@ -23,6 +24,7 @@ export default function AppRouter() {
       <Routes>
         <Route element={<AppShell />}>
           <Route index element={<Navigate to="/overview" replace />} />
+          <Route path="/solar" element={<LazyPage component={SolarPage} />} />
           <Route path="/overview" element={<LazyPage component={OverviewPage} />} />
           <Route path="/climate" element={<LazyPage component={ClimatePage} />} />
           <Route path="/energy" element={<LazyPage component={EnergyPage} />} />

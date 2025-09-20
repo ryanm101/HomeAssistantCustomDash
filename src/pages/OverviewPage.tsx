@@ -1,6 +1,8 @@
 import { useHAConnection } from "../hooks/useHAConnection";
 import { ClimateCard } from "../widgets/ClimateCard";
+import { EnergyFlowCard } from "../widgets/EnergyFlowCard";
 import { EnergyNowCard } from "../widgets/EnergyNowCard";
+import { CapacityCard } from "../widgets/CapacityCard";
 import { EntityTile } from "../widgets/EntityTile";
 import { MediaTile } from "../widgets/MediaTile";
 import { SecurityTile } from "../widgets/SecurityTile";
@@ -33,8 +35,14 @@ export default function OverviewPage() {
   }
 
   return (
-    <div className="grid min-h-full grid-cols-12 gap-4 auto-rows-[minmax(140px,1fr)]">
-      <div className="col-span-5 row-span-2 min-h-[280px]">
+    <div className="grid min-h-full grid-cols-12 gap-4 auto-rows-[minmax(160px,1fr)]">
+      <div className="col-span-6 row-span-2 min-h-[320px]">
+        <EnergyFlowCard />
+      </div>
+      <div className="col-span-6 row-span-2 min-h-[320px]">
+        <CapacityCard />
+      </div>
+      <div className="col-span-4 row-span-2 min-h-[280px]">
         <ClimateCard entityId={DEFAULT_ENTITIES.climate} />
       </div>
       <div className="col-span-4 row-span-2 min-h-[280px]">
@@ -43,20 +51,20 @@ export default function OverviewPage() {
           productionId={DEFAULT_ENTITIES.energyProduction}
         />
       </div>
-      <div className="col-span-3 row-span-1">
+      <div className="col-span-4 row-span-1">
         <SensorTile entityId={DEFAULT_ENTITIES.temperature} label="Outdoor" />
+      </div>
+      <div className="col-span-4 row-span-1">
+        <SecurityTile entityId={DEFAULT_ENTITIES.alarm} />
+      </div>
+      <div className="col-span-4 row-span-2 min-h-[280px]">
+        <MediaTile entityId={DEFAULT_ENTITIES.mediaPlayer} />
       </div>
       <div className="col-span-4 row-span-1">
         <EntityTile entityId={DEFAULT_ENTITIES.livingRoomLight} title="Living Room" />
       </div>
       <div className="col-span-4 row-span-1">
         <EntityTile entityId={DEFAULT_ENTITIES.hallwayLight} title="Hallway" />
-      </div>
-      <div className="col-span-4 row-span-2 min-h-[280px]">
-        <MediaTile entityId={DEFAULT_ENTITIES.mediaPlayer} />
-      </div>
-      <div className="col-span-4 row-span-1">
-        <SecurityTile entityId={DEFAULT_ENTITIES.alarm} />
       </div>
       <div className="col-span-4 row-span-1">
         <Tile title="Connection" subtitle={status.phase.toUpperCase()}>

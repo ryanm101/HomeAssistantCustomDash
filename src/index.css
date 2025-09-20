@@ -56,3 +56,29 @@ button {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.energy-flow-svg {
+  width: min(200px, 45vw);
+  aspect-ratio: 1;
+  display: block;
+}
+
+.energy-flow-path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 6 8;
+  stroke-dashoffset: 0;
+  stroke-width: 1;
+  opacity: 0.9;
+  color: currentColor;
+  transition: opacity .3s, stroke-width .3s;
+}
+
+.energy-flow-path--animate { animation: energy-flow 4s linear infinite; }
+.energy-flow-path--reverse { animation-direction: reverse; }
+
+.energy-flow-path--solar   { stroke: #facc15; color: #facc15; } /* yellow */
+.energy-flow-path--grid    { stroke: #60a5fa; color: #60a5fa; } /* blue */
+.energy-flow-path--battery { stroke: #34d399; color: #34d399; } /* green */
+
+@keyframes energy-flow { to { stroke-dashoffset: -36; } }
