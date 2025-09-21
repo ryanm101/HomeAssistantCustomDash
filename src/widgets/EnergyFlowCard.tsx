@@ -240,6 +240,7 @@ function EnergyFlowSvg({ flows }: { flows: Record<FlowKey, number | null> }) {
       {FLOW_DEFS.map((def) => (
         <FlowPath
           key={def.key}
+          flowKey={def.key}
           reading={flows[def.key] ?? 0}
           from={def.from}
           to={def.to}
@@ -251,7 +252,8 @@ function EnergyFlowSvg({ flows }: { flows: Record<FlowKey, number | null> }) {
   );
 }
 
-function FlowPath({ reading, from, to, color, anchors }: {
+function FlowPath({ flowKey, reading, from, to, color, anchors }: {
+  flowKey: FlowKey;
   reading: number;
   from: NodeKey;
   to: NodeKey;
@@ -269,6 +271,13 @@ function FlowPath({ reading, from, to, color, anchors }: {
     direction === 1 ? endNode : startNode,
     direction === 1 ? anchors.to : anchors.from,
   );
+
+  let textPosition = { ...labelPoint };
+  if (flowKey === "generationToBattery") {
+    textPosition.y -= 8;
+  } else if (flowKey === "gridToHouse") {
+    textPosition.y += 12;
+  }
 
   const animate = magnitude > 1;
   const animateClasses = animate
@@ -294,10 +303,14 @@ function FlowPath({ reading, from, to, color, anchors }: {
       />
       {animate ? (
         <text
-          x={labelPoint.x}
-          y={labelPoint.y}
+          x={textPosition.x}
+          y={textPosition.y}
           textAnchor="middle"
           className="fill-white/85 text-[11px] font-medium"
+          transform={
+            flowKey === "generationToBattery" ? `rotate(-90 ${textPosition.x} ${textPosition.y})` : undefined
+          }
+          dy={flowKey === "generationToBattery" ? "0.35em" : undefined}
         >
           {formatPowerMagnitude(magnitude)}
         </text>

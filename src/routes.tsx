@@ -8,6 +8,7 @@ const EnergyPage = lazy(() => import("./pages/EnergyPage"));
 const MediaPage = lazy(() => import("./pages/MediaPage"));
 const SecurityPage = lazy(() => import("./pages/SecurityPage"));
 const WashingMachinePage = lazy(() => import("./pages/WashingMachinePage"));
+const VacuumPage = lazy(() => import("./pages/VacuumPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 
 function LoadingFallback() {
@@ -30,8 +31,9 @@ export default function AppRouter() {
           <Route path="/media" element={<LazyPage component={MediaPage} />} />
           <Route path="/security" element={<LazyPage component={SecurityPage} />} />
           <Route path="/washing-machine" element={<LazyPage component={WashingMachinePage} />} />
+          <Route path="/vacuum" element={<LazyPage component={VacuumPage} />} />
           <Route path="/settings" element={<LazyPage component={SettingsPage} />} />
-          <Route path="*" element={<Navigate to="/overview" replace />} />
+          <Route path="*" element={<Navigate to="/solar" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>
