@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useEntity } from "../hooks/useEntity";
 import { Placeholder, Tile } from "./Tile";
 
+// Default Home Assistant sensor IDs and inverter limit
 const DEFAULT_IDS = {
   generationToHouse: "sensor.solar_panel_to_house_w",
   generationToGrid: "sensor.solar_panel_to_grid_w",
@@ -31,7 +32,7 @@ export function CapacityCard({ ids, inverterLimitKw }: CapacityCardProps) {
   const solarTotal = sumSafe([solarHouse.value, solarGrid.value, solarBattery.value]);
   const houseLoad = sumSafe([solarHouse.value, gridHouse.value, batteryHouse.value]);
 
-  if (solarTotal === null || houseLoad === null) {
+  if (solarTotal === null && houseLoad === null) {
     return (
       <Tile title="Available Capacity" subtitle="Awaiting Home Assistant data">
         <Placeholder message="We need generation and house load sensors before showing inverter headroom." />
@@ -39,13 +40,16 @@ export function CapacityCard({ ids, inverterLimitKw }: CapacityCardProps) {
     );
   }
 
-  const acAvailable = Math.min(solarTotal, inverterLimit);
-  const availableForHouse = Math.max(0, acAvailable - houseLoad);
-  const toBattery = Math.max(0, solarTotal - acAvailable);
-  const inverterHeadroom = Math.max(0, inverterLimit - houseLoad);
+  const safeSolarTotal = solarTotal ?? 0;
+  const safeHouseLoad = houseLoad ?? 0;
+
+  const acAvailable = Math.min(safeSolarTotal, inverterLimit);
+  const availableForHouse = Math.max(0, acAvailable - safeHouseLoad);
+  const toBattery = Math.max(0, safeSolarTotal - acAvailable);
+  const inverterHeadroom = Math.max(0, inverterLimit - safeHouseLoad);
 
   const supplyBreakdown = resolveSupplyBreakdown({
-    houseLoad,
+    houseLoad: safeHouseLoad,
     solarHouse: solarHouse.value ?? 0,
     batteryHouse: batteryHouse.value ?? 0,
     gridHouse: gridHouse.value ?? 0,
@@ -59,8 +63,8 @@ export function CapacityCard({ ids, inverterLimitKw }: CapacityCardProps) {
         <Highlight value={availableForHouse} label="Supply spare" tone="text-green-200" />
 
         <div className="grid gap-3 md:grid-cols-2">
-          <Metric label="Solar production" value={solarTotal} />
-          <Metric label="House load" value={houseLoad} />
+          <Metric label="Solar production" value={safeSolarTotal} />
+          <Metric label="House load" value={safeHouseLoad} />
           <Metric label="Inverter limit" value={inverterLimit} />
           <Metric label="Charging battery" value={toBattery} />
         </div>
@@ -74,7 +78,7 @@ export function CapacityCard({ ids, inverterLimitKw }: CapacityCardProps) {
 
         <ProgressBar
           total={inverterLimit}
-          used={Math.min(houseLoad, inverterLimit)}
+          used={Math.min(safeHouseLoad, inverterLimit)}
           label="Inverter utilisation"
         />
         <div className="text-xs text-slate-400">
@@ -214,11 +218,8 @@ function ProgressBar({ total, used, label }: { total: number; used: number; labe
 }
 
 function usePower(entityId?: string) {
-  if (!entityId) {
-    return { value: null };
-  }
-  const entity = useEntity(entityId);
-  if (!entity) {
+  const entity = useEntity(entityId ?? "");
+  if (!entityId || !entity) {
     return { value: null };
   }
   const value = Number(entity.state);
@@ -252,24 +253,44 @@ function resolveSupplyBreakdown({
   batteryHouse: number;
   gridHouse: number;
 }) {
+  const solarContrib = Math.max(0, solarHouse);
+  const batteryContrib = Math.max(0, batteryHouse);
+  const gridContrib = Math.max(0, gridHouse);
+  const totalLoad = Math.max(0, houseLoad);
+
   let breakdown = [
-    { label: "Solar", value: Math.max(0, solarHouse), color: "#facc15" },
-    { label: "Battery", value: Math.max(0, batteryHouse), color: "#22c55e" },
-    { label: "Grid", value: Math.max(0, gridHouse), color: "#38bdf8" },
+    { label: "Solar", value: solarContrib, color: "#facc15" },
+    { label: "Battery", value: batteryContrib, color: "#22c55e" },
+    { label: "Grid", value: gridContrib, color: "#38bdf8" },
   ];
 
-  const supplyTotal = breakdown.reduce((acc, item) => acc + item.value, 0);
+  const supplyTotal = solarContrib + batteryContrib + gridContrib;
 
-  if (supplyTotal <= 1 && houseLoad > 1) {
+  if (totalLoad <= 1) {
+    return [{ label: "Idle", value: 0, percent: 0, color: "#64748b" }];
+  }
+
+  if (supplyTotal <= 1) {
     breakdown = [
-      { label: "Grid", value: houseLoad, color: "#38bdf8" },
+      { label: "Grid", value: totalLoad, color: "#38bdf8" },
       { label: "Solar", value: 0, color: "#facc15" },
       { label: "Battery", value: 0, color: "#22c55e" },
     ];
+  } else if (Math.abs(supplyTotal - totalLoad) > totalLoad * 0.1) {
+    const scaleFactor = totalLoad / supplyTotal;
+    breakdown = breakdown.map((item) => ({
+      ...item,
+      value: item.value * scaleFactor,
+    }));
   }
 
-  const total = breakdown.reduce((acc, item) => acc + item.value, 0);
-  return breakdown.map((item) => ({ ...item, percent: total > 0 ? (item.value / total) * 100 : 0 }));
+  const filtered = breakdown.filter((item) => item.value > 0);
+  const total = filtered.reduce((acc, item) => acc + item.value, 0);
+
+  return filtered.map((item) => ({
+    ...item,
+    percent: total > 0 ? (item.value / total) * 100 : 0,
+  }));
 }
 
 function clampPercent(value: number) {

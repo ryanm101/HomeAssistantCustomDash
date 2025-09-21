@@ -6,7 +6,7 @@ Touch-first Home Assistant dashboard tuned for Raspberry Pi kiosks (1024×600). 
 
 - ⚡️ Lazy-loaded routes with an app shell (top bar, sidebar, footer) built for touch targets ≥ 44 px.
 - 🧠 Resilient HA client with exponential backoff, latency pings, optimistic service calls, and normalized entity store.
-- 📊 Overview dashboard widgets (climate, energy, media, security, sensors) with optimistic interactions.
+- 📊 Solar and appliance dashboards (climate, energy, media, security contexts) with optimistic interactions.
 - 📶 Footer status displaying connection, latency, last update, and live alerts; offline banner with Wake Lock helpers.
 - 📱 PWA-ready build (`vite-plugin-pwa`), offline shell caching, and configurable theme/density persistence.
 - 🧪 Vitest + Testing Library coverage including client retry logic, selector render counts, widget interactions, and axe accessibility checks.

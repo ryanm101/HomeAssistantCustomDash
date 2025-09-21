@@ -16,7 +16,7 @@ describe('AppShell', () => {
     expect(screen.getByRole('navigation', { name: /sidebar/i })).toBeInTheDocument()
     const sidebar = screen.getByRole('navigation', { name: /sidebar/i })
     const links = within(sidebar).getAllByRole('link')
-    expect(links[0]).toHaveTextContent(/solar/i)
+    expect(links[0]).toHaveAccessibleName(/solar/i)
     expect(screen.getByTestId('status-dot')).toBeInTheDocument()
   })
 })

@@ -9,7 +9,7 @@ export default function AppShell() {
   const { settings } = useKioskSettings();
   return (
     <div
-      className="grid min-h-dvh w-full grid-cols-[92px_1fr] grid-rows-[auto_1fr_auto] bg-slate-950/90 text-slate-100 backdrop-blur"
+      className="grid min-h-dvh w-full grid-cols-[40px_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-slate-950/90 text-slate-100 backdrop-blur"
       data-density={settings.density}
       style={{
         paddingTop: "var(--safe-top)",
@@ -25,7 +25,7 @@ export default function AppShell() {
       <aside className="row-start-2 border-r border-slate-800/70 bg-slate-900/40">
         <Sidebar />
       </aside>
-      <main className="row-start-2 col-start-2 overflow-auto p-4">
+      <main className="row-start-2 col-start-2 overflow-y-auto p-4">
         <Outlet />
       </main>
       <footer className="col-span-2 border-t border-slate-800/70 bg-slate-900/55">

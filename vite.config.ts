@@ -20,6 +20,8 @@ export default defineConfig({
       },
       devOptions: {
         enabled: true,
+        disableRuntimeConfig: true,
+        suppressWarnings: true,
       },
     }),
   ],

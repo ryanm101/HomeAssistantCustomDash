@@ -52,6 +52,10 @@ const LAYOUT = {
   } as Record<NodeKey, { x: number; y: number }>,
 };
 
+// Helps align diagonal connectors so they meet node edges cleanly
+const EDGE_FACTOR = 0.707; // cos(45°)
+const DIAGONAL_OFFSET = LAYOUT.nodeRadius * EDGE_FACTOR;
+
 const FLOW_DEFS: Array<{
   key: FlowKey;
   from: NodeKey;
@@ -63,8 +67,8 @@ const FLOW_DEFS: Array<{
     from: "solar",
     to: "home",
     anchors: {
-      from: [LAYOUT.nodeRadius * 0.65, LAYOUT.nodeRadius * 0.65],
-      to: [-LAYOUT.nodeRadius * 0.65, -LAYOUT.nodeRadius * 0.65],
+      from: [DIAGONAL_OFFSET, DIAGONAL_OFFSET],
+      to: [-DIAGONAL_OFFSET, -DIAGONAL_OFFSET],
     },
   },
   {
@@ -72,8 +76,8 @@ const FLOW_DEFS: Array<{
     from: "solar",
     to: "grid",
     anchors: {
-      from: [-LAYOUT.nodeRadius * 0.65, LAYOUT.nodeRadius * 0.65],
-      to: [LAYOUT.nodeRadius * 0.65, -LAYOUT.nodeRadius * 0.65],
+      from: [-DIAGONAL_OFFSET, DIAGONAL_OFFSET],
+      to: [DIAGONAL_OFFSET, -DIAGONAL_OFFSET],
     },
   },
   {
@@ -99,8 +103,8 @@ const FLOW_DEFS: Array<{
     from: "grid",
     to: "battery",
     anchors: {
-      from: [LAYOUT.nodeRadius * 0.7, LAYOUT.nodeRadius * 0.4],
-      to: [-LAYOUT.nodeRadius * 0.7, -LAYOUT.nodeRadius * 0.4],
+      from: [DIAGONAL_OFFSET * 0.9, DIAGONAL_OFFSET * 0.5],
+      to: [-DIAGONAL_OFFSET * 0.9, -DIAGONAL_OFFSET * 0.5],
     },
   },
   {
@@ -108,8 +112,8 @@ const FLOW_DEFS: Array<{
     from: "battery",
     to: "home",
     anchors: {
-      from: [LAYOUT.nodeRadius * 0.7, -LAYOUT.nodeRadius * 0.4],
-      to: [-LAYOUT.nodeRadius * 0.7, LAYOUT.nodeRadius * 0.4],
+      from: [DIAGONAL_OFFSET * 0.9, -DIAGONAL_OFFSET * 0.5],
+      to: [-DIAGONAL_OFFSET * 0.9, DIAGONAL_OFFSET * 0.5],
     },
   },
   {
@@ -117,8 +121,8 @@ const FLOW_DEFS: Array<{
     from: "battery",
     to: "grid",
     anchors: {
-      from: [-LAYOUT.nodeRadius * 0.7, -LAYOUT.nodeRadius * 0.4],
-      to: [LAYOUT.nodeRadius * 0.7, LAYOUT.nodeRadius * 0.4],
+      from: [-DIAGONAL_OFFSET * 0.9, -DIAGONAL_OFFSET * 0.5],
+      to: [DIAGONAL_OFFSET * 0.9, DIAGONAL_OFFSET * 0.5],
     },
   },
 ];
@@ -130,13 +134,26 @@ export interface EnergyFlowCardProps {
 export function EnergyFlowCard({ ids }: EnergyFlowCardProps) {
   const entityIds = useMemo(() => ({ ...DEFAULT_IDS, ...ids }), [ids]);
 
-  const flows = FLOW_DEFS.reduce<Record<FlowKey, number | null>>((acc, def) => {
-    acc[def.key] = readPower(entityIds[def.key]);
-    return acc;
-  }, {} as Record<FlowKey, number | null>);
+  const generationToHouse = useReadPower(entityIds.generationToHouse);
+  const generationToGrid = useReadPower(entityIds.generationToGrid);
+  const generationToBattery = useReadPower(entityIds.generationToBattery);
+  const gridToHouse = useReadPower(entityIds.gridToHouse);
+  const gridToBattery = useReadPower(entityIds.gridToBattery);
+  const batteryToHouse = useReadPower(entityIds.batteryToHouse);
+  const batteryToGrid = useReadPower(entityIds.batteryToGrid);
 
-  const batteryState = entityIds.batteryState ? useEntity(entityIds.batteryState) : undefined;
-  const batteryPercent = clamp(Number(batteryState?.state), 0, 100);
+  const flows: Record<FlowKey, number | null> = {
+    generationToHouse,
+    generationToGrid,
+    generationToBattery,
+    gridToHouse,
+    gridToBattery,
+    batteryToHouse,
+    batteryToGrid,
+  };
+
+  const batteryState = useEntity(entityIds.batteryState ?? "");
+  const batteryPercent = entityIds.batteryState && batteryState ? clamp(Number(batteryState.state), 0, 100) : NaN;
 
   const hasData = Object.values(flows).some((value) => value !== null && Math.abs(value) > 1);
   if (!hasData) {
@@ -388,10 +405,10 @@ function summariseBubble(
   return { value: sum, displayValue: `${sign}${Math.round(abs)}`, unit: "W" };
 }
 
-function readPower(entityId?: string) {
-  if (!entityId) return null;
-  const entity = useEntity(entityId);
-  if (!entity) return null;
+function useReadPower(entityId?: string) {
+  const entity = useEntity(entityId ?? "");
+  if (!entityId || !entity) return null;
+
   const value = Number(entity.state);
   return Number.isFinite(value) ? value : null;
 }

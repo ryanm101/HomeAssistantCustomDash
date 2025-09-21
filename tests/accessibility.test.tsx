@@ -15,10 +15,10 @@ describe("App accessibility", () => {
   it("renders AppShell without axe violations", async () => {
     resetEntitiesStore();
     const { container } = render(
-      <MemoryRouter initialEntries={["/overview"]}>
+      <MemoryRouter initialEntries={["/solar"]}>
         <Routes>
           <Route element={<AppShell />}>
-            <Route path="/overview" element={<div>Overview</div>} />
+            <Route path="/solar" element={<div>Solar</div>} />
           </Route>
         </Routes>
       </MemoryRouter>,

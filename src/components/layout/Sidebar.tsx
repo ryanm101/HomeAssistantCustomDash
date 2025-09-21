@@ -1,34 +1,33 @@
 import { NavLink } from "react-router-dom";
 
 const links = [
-  { to: "/solar", label: "Solar", abbr: "SL" },
-  { to: "/overview", label: "Overview", abbr: "OV" },
-  { to: "/climate", label: "Climate", abbr: "CL" },
-  { to: "/energy", label: "Energy", abbr: "EN" },
-  { to: "/media", label: "Media", abbr: "MD" },
-  { to: "/security", label: "Security", abbr: "SC" },
-  { to: "/settings", label: "Settings", abbr: "ST" },
+  { to: "/solar", label: "Solar", icon: "☀" },
+  { to: "/washing-machine", label: "Laundry", icon: "🧺" },
+  { to: "/climate", label: "Climate", icon: "🌡" },
+  { to: "/settings", label: "Settings", icon: "⚙" },
 ];
 
 export default function Sidebar() {
   return (
-    <nav className="flex h-full w-[92px] flex-col gap-3 p-3" aria-label="Sidebar">
+    <nav className="flex h-full w-[40px] flex-col gap-1 bg-slate-950/80 p-1" aria-label="Sidebar">
       {links.map((link) => (
         <NavLink
           key={link.to}
           to={link.to}
           className={({ isActive }) =>
-            `group flex-1 rounded-2xl border border-slate-800/70 px-3 py-4 text-center text-xs font-medium uppercase tracking-wide transition ${
+            `group flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border border-slate-800/60 px-1 py-2 text-center transition-all duration-200 ${
               isActive
-                ? "bg-slate-800/70 text-cyan-200 shadow-[0_10px_30px_rgba(15,118,212,0.25)]"
-                : "bg-slate-900/30 text-slate-300/80 hover:bg-slate-800/40"
+                ? "bg-slate-800/70 text-cyan-200 shadow-[0_10px_20px_rgba(8,126,164,0.25)]"
+                : "bg-slate-900/20 text-slate-300/80 hover:border-cyan-400/50 hover:text-cyan-100"
             }`
           }
         >
-          <span className="mb-1 block text-base tracking-widest" aria-hidden>
-            {link.abbr}
+          <span className="text-[18px]" aria-hidden>
+            {link.icon}
           </span>
-          <span className="block">{link.label}</span>
+          <span className="text-[7px] font-semibold uppercase tracking-[0.25em] leading-3 text-slate-300">
+            {link.label}
+          </span>
         </NavLink>
       ))}
     </nav>
